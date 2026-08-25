@@ -311,7 +311,7 @@
 
     </div>
 <script>
-    document.getElementById("pedidoForm").addEventListener("submit", function(event) {
+    document.getElementById("pedidoForm").addEventListener("submit", async function(event) {
 
         event.preventDefault();
 
@@ -319,24 +319,66 @@
         const telefono = document.getElementById("telefono").value;
         const ciudad = document.getElementById("ciudad").value;
         const direccion = document.getElementById("direccion").value;
-        const cantidad = document.getElementById("cantidad").value;
+        const cantidad = Number(document.getElementById("cantidad").value);
 
-        const total = 159 * Number(cantidad);
+        const producto = "Combo de 2 lentes TR90";
+        const precio = 159;
+        const total = precio * cantidad;
 
-        const mensaje =
-            `Hola, quiero hacer un pedido en Clik Ya.%0A%0A` +
-            `Producto: Combo de 2 lentes TR90%0A` +
-            `Cantidad: ${cantidad}%0A` +
-            `Precio total: S/${total}%0A%0A` +
-            `Nombre: ${nombre}%0A` +
-            `Teléfono: ${telefono}%0A` +
-            `Ciudad: ${ciudad}%0A` +
-            `Dirección: ${direccion}`;
+        const pedido = {
+            nombre: nombre,
+            telefono: telefono,
+            ciudad: ciudad,
+            direccion: direccion,
+            producto: producto,
+            cantidad: cantidad,
+            total: total
+        };
 
-        window.open(
-            `https://wa.me/51941841063?text=${mensaje}`,
-            "_blank"
-        );
+        try {
+
+            const respuesta = await fetch(
+                "https://clik-ya-appi.onrender.com/pedidos",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(pedido)
+                }
+            );
+
+            if (!respuesta.ok) {
+                throw new Error("No se pudo guardar el pedido");
+            }
+
+            const resultado = await respuesta.json();
+
+            const mensaje =
+                `Hola, quiero hacer un pedido en Clik Ya.%0A%0A` +
+                `Pedido #${resultado.pedido[0].id}%0A` +
+                `Producto: ${producto}%0A` +
+                `Cantidad: ${cantidad}%0A` +
+                `Total: S/${total}%0A%0A` +
+                `Nombre: ${nombre}%0A` +
+                `Teléfono: ${telefono}%0A` +
+                `Ciudad: ${ciudad}%0A` +
+                `Dirección: ${direccion}`;
+
+            window.open(
+                `https://wa.me/51941841063?text=${mensaje}`,
+                "_blank"
+            );
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "No pudimos registrar el pedido. " +
+                "Por favor, inténtalo nuevamente."
+            );
+        }
     });
 </script>
 </body>
