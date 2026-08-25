@@ -1,3 +1,6 @@
 pedidos.txt
 ventas.txt
 ventas.py
+.env
+.venv/
+
